@@ -10,6 +10,7 @@ export default function StreamEchoPage() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const token = sessionStorage.getItem("access_token");
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -19,9 +20,13 @@ export default function StreamEchoPage() {
 
     try {
       const response = await api.post("/api/echo/stream", input, {
+        // headers: {
+        //   "Content-Type": contentType,
+        // },
         headers: {
-          "Content-Type": contentType,
+          Authorization: `Bearer ${token}`,
         },
+        body: "",
         responseType: "text",
         transformResponse: [(data) => data],
       });

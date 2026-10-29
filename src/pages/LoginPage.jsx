@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { LockKeyhole, RefreshCw, ShieldCheck } from "lucide-react";
 import { getLoginChallenge, login } from "../services/authService.js";
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -53,7 +54,10 @@ export default function LoginPage({ onLogin }) {
 
     
 
-console.log(challenge.salt, captchaAnswer.trim());
+console.log(result);
+console.log(jwtDecode(result.access_token));
+
+
 
 
       onLogin(result);

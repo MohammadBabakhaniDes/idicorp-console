@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Calculator, Wifi, WifiOff } from "lucide-react";
 import SectionTitle from "../components/SectionTitle.jsx";
@@ -53,20 +52,38 @@ export default function CalculatorPage({ onNotice }) {
       .filter(Boolean)
       .map(Number);
 
-    if (
-      values.length < 2 ||
-      values.some((value) => !Number.isFinite(value))
-    ) {
-      setError("Enter at least two valid numbers separated by commas.");
+    // Must contain between 1 and 100 numbers
+    if (values.length < 1 || values.length > 100) {
+      setError("Enter between 1 and 100 numbers.");
       return;
     }
 
+    // All values must be finite numbers
+    if (values.some((value) => !Number.isFinite(value))) {
+      setError("All values must be valid finite numbers.");
+      return;
+    }
+
+    // Absolute value must not exceed 10^12
+    if (values.some((value) => Math.abs(value) > 1e12)) {
+      setError("Each number must be between -10^12 and 10^12.");
+      return;
+    }
+
+    // Division by zero is not allowed
     if (operation === "divide" && values.slice(1).some((n) => n === 0)) {
       setError("Cannot divide by zero.");
       return;
     }
 
-    const sent = socketRef.current?.calculate(operation, values);
+    const client = socketRef.current;
+
+    if (!client) {
+      setError("Calculator connection is not available.");
+      return;
+    }
+
+    const sent = client.calculate(operation, values);
 
     if (!sent) {
       setError("Calculator is not connected yet. Please wait and try again.");
@@ -83,21 +100,19 @@ export default function CalculatorPage({ onNotice }) {
 
       <section className="panel calculator-panel">
         <div className="connection-status">
-          {status === "connected" ? (
-            <Wifi size={18} />
-          ) : (
-            <WifiOff size={18} />
-          )}
+          {status === "connected" ? <Wifi size={18} /> : <WifiOff size={18} />}
           <span>
             {status === "connected"
               ? "Connected"
               : status === "connecting"
-                ? "Connecting..."
-                : status === "unauthorized"
-                  ? "Authentication failed"
-                  : "Disconnected"}
+              ? "Connecting..."
+              : status === "unauthorized"
+              ? "Authentication failed"
+              : "Disconnected"}
           </span>
-          <span className={`status-dot ${status === "connected" ? "online" : ""}`} />
+          <span
+            className={`status-dot ${status === "connected" ? "online" : ""}`}
+          />
         </div>
 
         <form className="calculator-form" onSubmit={handleCalculate}>

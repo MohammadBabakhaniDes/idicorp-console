@@ -5,25 +5,28 @@ export const API_BASE_URL = (
 ).replace(/\/+$/, "");
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
-    withCredentials: true,
-    headers: {
-      Accept: "application/json",
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    Accept: "application/json",
     // "X-CSRFToken": document.cookie.split("; ")[0].split("=")[1] || ""
-    },
-  });
+  },
+});
 
 // قبل از ارسال هر درخواست، توکن ورود را اضافه می‌کنیم.
 api.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem("access_token");
-    console.log(document.cookie);
-    
+    const tokenType = sessionStorage.getItem("token_type") || "Bearer";
+
+    console.log("Token exists:", Boolean(token));
+    console.log("Token type:", tokenType);
 
     if (token) {
-      const tokenType = sessionStorage.getItem("token_type") || "Bearer";
       config.headers.Authorization = `${tokenType} ${token}`;
-    //   config.headers.X-CSRFToken: document.cookie.split("; ")[0].split("=")[1] || ""
+
+      // config.headers.Authorization = `Bearer ${token}`;
+      //   config.headers.X-CSRFToken: document.cookie.split("; ")[0].split("=")[1] || ""
     }
 
     return config;
